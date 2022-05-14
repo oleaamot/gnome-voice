@@ -1,0 +1,33 @@
+=============
+Version 0.0.2
+=============
+
+GUI (src/gnome-voice-main.c)
+
+	* Voice audio record
+	* Second release
+	* Voice pointer
+
+=============
+Version 0.0.1
+=============
+
+Build (configure.ac)
+
+      * Build on MacPorts 2.7.1
+
+Build (gnome-voice.spec)
+
+      * Build on Fedora Core 34
+
+XML (gnome-voice.xml)
+
+	* Hawaii Public Radio (KHPR)
+	* New York City Public Radio (WNYC)
+	* Southern California Public Radio (SCPR)
+
+GUI (src/gnome-voice-main.c)
+
+	* Voice audio player
+	* First release
+	* Voice pointer

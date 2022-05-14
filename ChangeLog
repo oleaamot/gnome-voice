@@ -1,0 +1,16 @@
+2022-02-15  Ole Aamot  <ole@gnome.org>
+
+	* GNOME Voice 0.0.1
+	* gnome-voice-main.c: Add KHPR (Hawaii)
+	* gnome-voice-vosc.c: Add functions for oscilloscope
+	* gnome-voice-vosc.h: Add functions for oscilloscope
+	* gnome-voice-main.c: Add SCPR (Southern California)
+	* Add GStreamer dependency (Meson)
+	* Add Play Location icon (Meson)
+	* Add playLocationBubble.js (Meson)
+	* Add playLocationMarker.js (Meson)
+	* Add MapBox for Meson build
+	* Set stage title (ClutterActor)
+	* gnome-voice.xml: Add WNYC (New York City)
+	* Add voice player (GstPlayer)
+	* Initial GNOME Voice release

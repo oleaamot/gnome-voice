@@ -1,0 +1,17 @@
+[Desktop Entry]
+Name=GNOME Voice
+Comment=Participate in Free Public Voice on GNOME
+TryExec=gnome-voice
+Exec=gnome-voice %U
+Icon=gnome-voice
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Music;Audio;AudioVideo;
+X-GNOME-Bugzilla-Bugzilla=GNOME
+X-GNOME-Bugzilla-Product=gnome-voice
+X-GNOME-Bugzilla-Component=general
+X-GNOME-Bugzilla-Version=0.0.1
+MimeType=application/gnome-voice;
+# Extra keywords that can be used to search for gnome-voice in GNOME Shell and Unity
+Keywords=Live;Voice;Program;Station;Free;
