@@ -185,6 +185,7 @@ main (gint argc, gchar **argv)
 	filename = g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL);
 	g_object_set(G_OBJECT(sink), "location",
 		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL));
+	g_object_set(G_OBJECT(enc), "quality", 1.0);
 	gst_bin_add_many(GST_BIN(pipeline), src, conv, enc, muxer, sink, NULL);
 	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
 
