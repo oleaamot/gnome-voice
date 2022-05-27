@@ -1,3 +1,14 @@
+2022-05-28  Ole Aamot  <ole@gnome.org>
+
+	* GNOME Voice 0.0.3
+	* gnome-voice-main.c: Add Voicegram window with URLs
+	* gnome-voice.xml: Add GNOME (Palo Alto, California)
+
+2022-05-15  Ole Aamot  <ole@gnome.org>
+
+	* GNOME Voice 0.0.2
+	* gnome-voice-main.c: Add Recording
+
 2022-02-15  Ole Aamot  <ole@gnome.org>
 
 	* GNOME Voice 0.0.1

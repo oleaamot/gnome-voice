@@ -1,4 +1,20 @@
 =============
+Version 0.0.3
+=============
+
+Build (gnome-voice.spec)
+
+      * Build on Fedora Core 36
+
+GUI (src/gnome-voice-main.c)
+
+	* Voicegram Window
+
+XML (gnome-voice.xml)
+
+	* Public Voice (GNOME)
+
+=============
 Version 0.0.2
 =============
 
