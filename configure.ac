@@ -15,6 +15,7 @@ AC_PROG_CC
 
 # Checks for libraries.
 PKG_CHECK_MODULES(GNOME_VOICE,
+                  clutter-gtk-1.0 >= 1.8.4 \
                   gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
@@ -23,7 +24,7 @@ PKG_CHECK_MODULES(GNOME_VOICE,
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
                   champlain-gtk-0.12 >= 0.12.10)
-GNOME_VOICE_PKG_DEPS="gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
+GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
 
 # Checks for header files.
 

@@ -14,6 +14,7 @@ BuildRequires:  libxml2-devel
 BuildRequires:  intltool
 BuildRequires:  itstool
 BuildRequires:  libappstream-glib
+BuildRequires:  clutter-gtk
 BuildRequires:  desktop-file-utils
 BuildRequires:  geoclue2-devel
 BuildRequires:  geocode-glib-devel

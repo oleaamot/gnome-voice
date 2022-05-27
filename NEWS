@@ -2,6 +2,10 @@
 Version 0.0.3
 =============
 
+Build (configure.ac)
+
+      * Build on MacPorts 2.7.2
+
 Build (gnome-voice.spec)
 
       * Build on Fedora Core 36

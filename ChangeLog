@@ -3,6 +3,7 @@
 	* GNOME Voice 0.0.3
 	* gnome-voice-main.c: Add Voicegram window with URLs
 	* gnome-voice.xml: Add GNOME (Palo Alto, California)
+	* Add clutter-gtk dependency (configure.ac)
 
 2022-05-15  Ole Aamot  <ole@gnome.org>
 

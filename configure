@@ -4643,7 +4643,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
     pkg_cv_GNOME_VOICE_CFLAGS="$GNOME_VOICE_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 >= 3.22.30 \\
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"clutter-gtk-1.0 >= 1.8.4 \\
+                  gtk+-3.0 >= 3.22.30 \\
                   gstreamer-1.0 >= 1.0 \\
                   gstreamer-player-1.0 >= 1.0 \\
                   gstreamer-tag-1.0 >= 1.0 \\
@@ -4651,7 +4652,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
                   gstreamer-plugins-bad-1.0 \\
                   gstreamer-plugins-base-1.0 \\
                   champlain-gtk-0.12 >= 0.12.10\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 >= 3.22.30 \
+  ($PKG_CONFIG --exists --print-errors "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4662,7 +4664,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GNOME_VOICE_CFLAGS=`$PKG_CONFIG --cflags "gtk+-3.0 >= 3.22.30 \
+  pkg_cv_GNOME_VOICE_CFLAGS=`$PKG_CONFIG --cflags "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4681,7 +4684,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
     pkg_cv_GNOME_VOICE_LIBS="$GNOME_VOICE_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"gtk+-3.0 >= 3.22.30 \\
+    { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"clutter-gtk-1.0 >= 1.8.4 \\
+                  gtk+-3.0 >= 3.22.30 \\
                   gstreamer-1.0 >= 1.0 \\
                   gstreamer-player-1.0 >= 1.0 \\
                   gstreamer-tag-1.0 >= 1.0 \\
@@ -4689,7 +4693,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
                   gstreamer-plugins-bad-1.0 \\
                   gstreamer-plugins-base-1.0 \\
                   champlain-gtk-0.12 >= 0.12.10\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "gtk+-3.0 >= 3.22.30 \
+  ($PKG_CONFIG --exists --print-errors "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4700,7 +4705,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_GNOME_VOICE_LIBS=`$PKG_CONFIG --libs "gtk+-3.0 >= 3.22.30 \
+  pkg_cv_GNOME_VOICE_LIBS=`$PKG_CONFIG --libs "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4728,7 +4734,8 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        GNOME_VOICE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "gtk+-3.0 >= 3.22.30 \
+	        GNOME_VOICE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4737,7 +4744,8 @@ fi
                   gstreamer-plugins-base-1.0 \
                   champlain-gtk-0.12 >= 0.12.10" 2>&1`
         else
-	        GNOME_VOICE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "gtk+-3.0 >= 3.22.30 \
+	        GNOME_VOICE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4749,7 +4757,8 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$GNOME_VOICE_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (gtk+-3.0 >= 3.22.30 \
+	as_fn_error $? "Package requirements (clutter-gtk-1.0 >= 1.8.4 \
+                  gtk+-3.0 >= 3.22.30 \
                   gstreamer-1.0 >= 1.0 \
                   gstreamer-player-1.0 >= 1.0 \
                   gstreamer-tag-1.0 >= 1.0 \
@@ -4788,7 +4797,7 @@ else
 printf "%s\n" "yes" >&6; }
 
 fi
-GNOME_VOICE_PKG_DEPS="gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
+GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
 
 # Checks for header files.
 
