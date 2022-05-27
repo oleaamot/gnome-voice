@@ -169,11 +169,10 @@ main (gint argc, gchar **argv)
 	GpsCallbackData callback_data;
 	GstElement *src, *conv, *enc, *muxer, *sink, *pipeline;
 	/* OscilloscopeCallbackData oscilloscope_data; */
-	/* VOSCWindow *vosc; */
+	VOSCWindow *vosc;
 	GMainLoop *main_loops;
 	gchar *filename;
 
-	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
 
@@ -182,22 +181,41 @@ main (gint argc, gchar **argv)
 	enc = gst_element_factory_make("vorbisenc", "vorbis_enc");
 	muxer = gst_element_factory_make("oggmux", "oggmux");
 	sink = gst_element_factory_make("filesink", "sink");
-	filename = g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL);
+	filename = g_strconcat("file://", g_get_host_name(), g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL);
 	g_object_set(G_OBJECT(sink), "location",
 		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL));
-	g_object_set(G_OBJECT(enc), "quality", 1.0);
+	/* g_object_set(G_OBJECT(enc), "quality", 1.0); */
 	gst_bin_add_many(GST_BIN(pipeline), src, conv, enc, muxer, sink, NULL);
 	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
 
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
-	
+	gtk_init(&argc, &argv);
 	main_loops = g_main_loop_new(NULL, TRUE);
   
-	if (clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
+	if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
 		return 1;
-	/* vosc = (VOSCWindow *)g_new0(VOSCWindow, 1); */
+	vosc = (VOSCWindow *)g_new0(VOSCWindow, 1);
+        /* Visual Oscillator */
+        vosc->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+        vosc->vbox = gtk_vbox_new (TRUE, 0);
+        vosc->streaminghistory = gtk_entry_buffer_new ("http://api.perceptron.stream:8000/56.ogg", 8196);
+        vosc->streaminggram = gtk_entry_new_with_buffer (vosc->streaminghistory);
+        vosc->streaminglabel = gtk_label_new ("Voicegram Streaming URL:");
+        vosc->recordinghistory = gtk_entry_buffer_new (filename, 8196);
+        vosc->recordinggram = gtk_entry_new_with_buffer (vosc->recordinghistory);
+        vosc->recordinglabel = gtk_label_new ("Voicegram Recording URL:");
+        gtk_window_set_title(GTK_WINDOW (vosc->window), "Voicegram");
+	gtk_window_set_default_size(GTK_WINDOW (vosc->window), 800, 20);
+	gtk_window_set_keep_above(GTK_WINDOW(vosc->window), TRUE);
+        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->streaminglabel));
+        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->streaminggram));
+        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->recordinglabel));
+        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->recordinggram));
+        gtk_container_add(GTK_CONTAINER (vosc->window), GTK_VBOX(vosc->vbox));
+        // voice_window_init (GTK_WINDOW (vosc->window));
+        gtk_widget_show_all (vosc->window);
 	stage = clutter_stage_new ();
-	clutter_stage_set_title (stage, g_strconcat("GNOME Voice", " ", VERSION, " - ", "http://www.gnomevoice.org/", " - ", "https://wiki.gnome.org/Apps/Voice", NULL));
+	clutter_stage_set_title (stage, g_strconcat(PACKAGE, " ", VERSION, " - ", "http://www.gnomevoice.org/", " - ", "https://wiki.gnome.org/Apps/Voice", NULL));
 	clutter_actor_set_size (stage, 800, 600);
 	g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
 	/* Create the map view */
@@ -226,7 +244,7 @@ main (gint argc, gchar **argv)
 	/* Create the voice player */
 	player = gst_player_new (NULL, gst_player_g_main_context_signal_dispatcher_new(NULL));
 	/* gnome_voice_file_loader (voiceinfo, "gnome-voice.xml"); */
-	gst_player_set_uri (GST_PLAYER (player), "http://api.perceptron.stream:8000/56.ogg");
+	gst_player_set_uri (GST_PLAYER (player), gtk_entry_get_text(vosc->streaminggram));
 	gst_player_stop (GST_PLAYER (player));
 	/* Visual Oscillator */
         /* vosc->window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
