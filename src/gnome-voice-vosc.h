@@ -11,16 +11,8 @@
 typedef struct _VOSCWindow VOSCWindow;
 
 struct _VOSCWindow {
-        GtkWidget *window;
-        GtkEntryBuffer *streaminghistory;
-        GtkEntry *streaminggram;
-        GtkLabel *streaminglabel;
-        GtkEntryBuffer *recordinghistory;
-        GtkEntry *recordinggram;
-        GtkLabel *recordinglabel;
-        GtkVBox *vbox;
-        GtkStack *stack;
-        struct timeval *tv;
+	GtkWidget *window;
+	struct timeval *tv;
 	struct timezone *tz;
         ClutterActor *actor;
         GstPlayer *player;

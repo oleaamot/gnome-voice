@@ -11,7 +11,13 @@
 
 static void
 on_clicked (ClutterClickAction *action, ClutterActor *actor, gpointer user_data) {
-  /* printf ("Clutter Station marker clicked\n"); */
+        printf ("Clutter Voice marker clicked\n");
+        return;
+}
+
+static void
+on_clicked_voicegram (ClutterClickAction *action, ClutterActor *actor, gpointer user_data) {
+        printf ("Clutter Voicegram clicked\n");
         return;
 }
 
@@ -135,14 +141,96 @@ create_voice_marker (void)
 	return voice_marker;
 }
 
+/*
+  gnome-voice draws the voice_marker wth Cairo composed of 1 static
+  filled circle and 1 stroked circle animated as echo.
+ */
+static ClutterActor *
+create_voicegram (void)
+{
+	ClutterActor *voicegram;
+	ClutterActor *bg;
+	ClutterTimeline *timeline;
+	cairo_t *cr;
+	ClutterAction *action;
+	/* Create the marker */
+	voicegram = champlain_custom_marker_new ();
+	action = clutter_click_action_new ();
+	/* Static filled circle ------------------------------------------ */
+	bg = clutter_cairo_texture_new (VOICE_MARKER_SIZE, VOICE_MARKER_SIZE);
+	cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE (bg));
+	cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
+	cairo_paint(cr);
+	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+	/* Draw the circle */
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_arc (cr, VOICE_MARKER_SIZE / 2.0,
+		   VOICE_MARKER_SIZE / 2.0,
+		   VOICE_MARKER_SIZE / 2.0, 0, 2 * M_PI);
+	cairo_close_path (cr);
+	/* Fill the circle */
+	cairo_set_source_rgba (cr, 0.9, 0.1, 0.1, 1.0);
+	cairo_fill (cr);
+	cairo_destroy (cr);
+	/* Add the circle to the voicegram */
+	clutter_container_add_actor (CLUTTER_CONTAINER (voicegram), bg);
+	clutter_actor_set_anchor_point_from_gravity (bg, CLUTTER_GRAVITY_CENTER);
+	clutter_actor_set_position (bg, 0, 0);
+	/* Echo circle ----------------------------------------------- */
+	bg = clutter_cairo_texture_new (2 * VOICE_MARKER_SIZE,
+					2 * VOICE_MARKER_SIZE);
+	cr = clutter_cairo_texture_create (CLUTTER_CAIRO_TEXTURE (bg));
+	/* Draw the circle */
+	cairo_set_source_rgb (cr, 0, 0, 0);
+	cairo_arc (cr, VOICE_MARKER_SIZE, VOICE_MARKER_SIZE,
+		   0.9 * VOICE_MARKER_SIZE, 0, 2 * M_PI);
+	cairo_close_path (cr);
+	/* Stroke the circle */
+	cairo_set_line_width (cr, 2.0);
+	cairo_set_source_rgba (cr, 0.7, 0.1, 0.1, 1.0);
+	cairo_stroke (cr);
+	cairo_destroy (cr);
+	/* Add the circle to the voice_marker */
+	clutter_container_add_actor (CLUTTER_CONTAINER (voicegram), bg);
+	clutter_actor_lower_bottom (bg); /* Ensure it is under the previous circle */
+	clutter_actor_set_position (bg, 0, 0);
+	clutter_actor_set_anchor_point_from_gravity (bg,
+						     CLUTTER_GRAVITY_CENTER);
+	/* Animate the echo circle */
+	timeline = clutter_timeline_new (1000);
+	clutter_timeline_set_loop (timeline, TRUE);
+	clutter_actor_set_opacity (CLUTTER_ACTOR (bg), 255);
+	clutter_actor_set_scale (CLUTTER_ACTOR (bg), 0.5, 0.5);
+	clutter_actor_animate_with_timeline (CLUTTER_ACTOR (bg),
+					     CLUTTER_EASE_OUT_SINE,
+					     timeline,
+					     "opacity", 0,
+					     "scale-x", 2.0,
+					     "scale-y", 2.0,
+					     NULL);
+	clutter_actor_add_action (CLUTTER_ACTOR (voicegram), CLUTTER_ACTION (action));
+	g_signal_connect (CLUTTER_ACTION (action), "clicked", G_CALLBACK (on_clicked_voicegram), NULL);
+	clutter_timeline_start (timeline);
+	return voicegram;
+}
+
 double lat = 21.293352;
 double lon = -157.839583;
+
+double lat_gps = 60.293352;
+double lon_gps = 10.839583;
 
 typedef struct
 {
 	ChamplainView *view;
 	ChamplainMarker *voice_marker;
 } GpsCallbackData;
+
+typedef struct
+{
+	ChamplainView *view;
+	ChamplainMarker *voicegram;
+} GetVoicegramData;
 
 typedef struct
 {
@@ -157,22 +245,33 @@ gps_callback (GpsCallbackData *data)
 	return TRUE;
 }
 
+static gboolean
+get_callback (GetVoicegramData *data)
+{
+	champlain_view_center_on (data->view, lat_gps, lon_gps);
+	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voicegram), lat_gps, lon_gps);
+	return TRUE;
+}
+
 gint
 main (gint argc, gchar **argv)
 {
 	GstPlayer *player;
 	GtkWidget *window;
 	ChamplainView *view;
-	ClutterActor *actor, *voice_oscilloscope, *voice_marker, *oscilloscope_visual, *stage;
+	ClutterActor *actor, *second, *voice_oscilloscope, *voice_marker, *voicegram, *oscilloscope_visual, *stage;
 	ChamplainMarkerLayer *layer;
+	ChamplainMarkerLayer *world;
 	VoiceInfo *voiceinfo;	
 	GpsCallbackData callback_data;
+	GetVoicegramData voicegram_data;
 	GstElement *src, *conv, *enc, *muxer, *sink, *pipeline;
 	/* OscilloscopeCallbackData oscilloscope_data; */
-	VOSCWindow *vosc;
+	/* VOSCWindow *vosc; */
 	GMainLoop *main_loops;
 	gchar *filename;
 
+	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
 
@@ -184,16 +283,16 @@ main (gint argc, gchar **argv)
 	filename = g_strconcat("file://", g_get_host_name(), g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL);
 	g_object_set(G_OBJECT(sink), "location",
 		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL));
-	/* g_object_set(G_OBJECT(enc), "quality", 1.0); */
 	gst_bin_add_many(GST_BIN(pipeline), src, conv, enc, muxer, sink, NULL);
 	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
 
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
-	gtk_init(&argc, &argv);
+
 	main_loops = g_main_loop_new(NULL, TRUE);
   
-	if (gtk_clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
+	if (clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
 		return 1;
+	/* vosc = (VOSCWindow *)g_new0(VOSCWindow, 1); */
 	stage = clutter_stage_new ();
 	clutter_stage_set_title (stage, g_strconcat(PACKAGE, " ", VERSION, " - ", "http://www.gnomevoice.org/", " - ", "https://wiki.gnome.org/Apps/Voice", NULL));
 	clutter_actor_set_size (stage, 800, 600);
@@ -202,13 +301,22 @@ main (gint argc, gchar **argv)
 	actor = champlain_view_new ();
 	clutter_actor_set_size (CLUTTER_ACTOR (actor), 800, 600);
 	clutter_container_add_actor (CLUTTER_CONTAINER (stage), actor);
+	second = champlain_view_new ();
+	clutter_actor_set_size (CLUTTER_ACTOR (second), 80, 60);
+	clutter_container_add_actor (CLUTTER_CONTAINER (stage), second);
 	/* Create the voice_marker layer */
 	layer = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_SINGLE);
+	world = champlain_marker_layer_new_full (CHAMPLAIN_SELECTION_SINGLE);
 	clutter_actor_show (CLUTTER_ACTOR (layer));
+	clutter_actor_show (CLUTTER_ACTOR (world));
 	champlain_view_add_layer (CHAMPLAIN_VIEW (actor), CHAMPLAIN_LAYER (layer));
+	champlain_view_add_layer (CHAMPLAIN_VIEW (second), CHAMPLAIN_LAYER (world));
 	/* Create a voice_marker */
 	voice_marker = create_voice_marker ();
 	champlain_marker_layer_add_marker (layer, CHAMPLAIN_MARKER (voice_marker));
+	/* Create a voicegram */
+	voicegram = create_voicegram ();
+	champlain_marker_layer_add_marker (world, CHAMPLAIN_MARKER (voicegram));
 	/* Create a oscilloscope_visual */
 	/* oscilloscope_visual = create_oscilloscope_visual (); */
         /* gnome_voice_add_visual_oscilloscope (layer, GNOME_VOICE_MARKER (oscilloscope_visual)); */
@@ -216,36 +324,20 @@ main (gint argc, gchar **argv)
 	g_object_set (G_OBJECT (actor), "zoom-level", 1,
 		      "kinetic-mode", TRUE, NULL);
 	champlain_view_center_on (CHAMPLAIN_VIEW (actor), lat, lon);
+	g_object_set (G_OBJECT (second), "zoom-level", 6,
+		      "kinetic-mode", TRUE, NULL);
+	champlain_view_center_on (CHAMPLAIN_VIEW (second), lat_gps, lon_gps);
 	/* Create callback that updates the map periodically */
 	callback_data.view = CHAMPLAIN_VIEW (actor);
 	callback_data.voice_marker = CHAMPLAIN_MARKER (voice_marker);
+	voicegram_data.view = CHAMPLAIN_VIEW (second);
+	voicegram_data.voicegram = CHAMPLAIN_MARKER (voicegram);
 	/* oscilloscope_data.view = GNOME_VOICE_VIEW (voice_oscilloscope); */
         /* oscilloscope_data.oscilloscope_visual = GNOME_VOICE_MARKER (oscilloscope_visual); */
 	/* Create the voice player */
 	player = gst_player_new (NULL, gst_player_g_main_context_signal_dispatcher_new(NULL));
 	/* gnome_voice_file_loader (voiceinfo, "gnome-voice.xml"); */
-	clutter_actor_show (stage);
-	vosc = (VOSCWindow *)g_new0(VOSCWindow, 1);
-        /* Visual Oscillator */
-        vosc->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-        vosc->vbox = gtk_vbox_new (TRUE, 0);
-        vosc->streaminghistory = gtk_entry_buffer_new ("http://api.perceptron.stream:8000/56.ogg", 4096);
-        vosc->streaminggram = gtk_entry_new_with_buffer (vosc->streaminghistory);
-        vosc->streaminglabel = gtk_label_new ("Streaming URL (Headset)");
-        vosc->recordinghistory = gtk_entry_buffer_new (filename, 4096);
-        vosc->recordinggram = gtk_entry_new_with_buffer (vosc->recordinghistory);
-        vosc->recordinglabel = gtk_label_new ("Recording URL (Microphone):");
-        gtk_window_set_title(GTK_WINDOW (vosc->window), "Voicegram");
-	gtk_window_set_default_size(GTK_WINDOW (vosc->window), 800, 40);
-	gtk_window_set_keep_above(GTK_WINDOW(vosc->window), TRUE);
-        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_LABEL(vosc->streaminglabel));
-        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->streaminggram));
-        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_LABEL(vosc->recordinglabel));
-        gtk_container_add(GTK_CONTAINER (vosc->vbox), GTK_ENTRY(vosc->recordinggram));
-        gtk_container_add(GTK_CONTAINER (vosc->window), GTK_VBOX(vosc->vbox));
-        // voice_window_init (GTK_WINDOW (vosc->window));
-        gtk_widget_show_all (vosc->window);
-	gst_player_set_uri (GST_PLAYER (player), gtk_entry_get_text(vosc->streaminggram));
+	gst_player_set_uri (GST_PLAYER (player), "http://api.perceptron.stream:8000/56.ogg");
 	gst_player_stop (GST_PLAYER (player));
 	/* Visual Oscillator */
         /* vosc->window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
@@ -254,7 +346,9 @@ main (gint argc, gchar **argv)
         /* clutter_container_add_actor (CLUTTER_CONTAINER (stage), CLUTTER_ACTOR (voice_oscilloscope)); */
 	gst_player_play(GST_PLAYER (player));
 	g_timeout_add (1000, (GSourceFunc) gps_callback, &callback_data);
+	g_timeout_add (1000, (GSourceFunc) gps_callback, &voicegram_data);
 	/* g_timeout_add (1000, (GSourceFunc) gnome_voice_real, &oscilloscope_data); */
+	clutter_actor_show (stage);
         /* clutter_actor_show (voice_oscilloscope); */
 	clutter_main ();
 	g_main_loop_run(main_loops);
