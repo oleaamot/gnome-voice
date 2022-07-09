@@ -270,7 +270,8 @@ main (gint argc, gchar **argv)
 	/* VOSCWindow *vosc; */
 	GMainLoop *main_loops;
 	gchar *filename;
-
+	GTimeVal *timeval;
+	GDateTime *datestamp;
 	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
@@ -287,7 +288,16 @@ main (gint argc, gchar **argv)
 	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
 
 	gst_element_set_state(pipeline, GST_STATE_PLAYING);
-
+        datestamp = g_date_time_new_now_utc ();
+	gst_tag_setter_add_tags (GST_TAG_SETTER (enc),
+				 GST_TAG_MERGE_APPEND,
+				 GST_TAG_TITLE, g_get_real_name(),
+				 GST_TAG_ARTIST, g_get_real_name(),
+				 GST_TAG_ALBUM, "Voicegram",
+				 GST_TAG_COMMENT, "GNOME Voice 0.0.5",
+				 GST_TAG_DATE, g_date_time_format_iso8601 (datestamp),
+				 NULL);
+	g_date_time_unref (datestamp);
 	main_loops = g_main_loop_new(NULL, TRUE);
   
 	if (clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)

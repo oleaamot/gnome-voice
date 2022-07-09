@@ -1,9 +1,9 @@
 Name:           @PACKAGE@
 Version:        @VERSION@
 Release:        1%{?dist}
-Summary:        GNOME Voice for GNOME 42
+Summary:        GNOME Voice for GNOME 43
 License:        GPLv3+
-URL:            https://www.gnomevoice.org/
+URL:            https://wiki.gnome.org/Apps/Voice
 Source:         %{url}/src/%{name}-%{version}.tar.xz
 
 BuildRequires:  gcc
@@ -29,12 +29,12 @@ Requires:       geoclue2 >= 2.5.7
 
 %description
 GNOME Voice is a Free Software program that allows you easily
-participate on Free Public Voice broadcasts under GNOME 42.
+participate on Free Public Voice broadcasts under GNOME 43.
 
 GNOME Voice is developed on the GNOME desktop platform and
 it requires GTK+ 3.0, Clutter and GStreamer 1.0 for playback.
 
-Enjoy Free Public Voice broadcasts under GNOME 42.
+Enjoy Free Public Voice broadcasts under GNOME 43.
 
 %prep
 %setup -q
@@ -57,6 +57,9 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/gnome-voice.svg
 
 %changelog
+* Sat Jul 09 2022 Ole Aamot <ole@gnome.org> - 0.0.5-1
+- gnome-voice 0.0.5 build on Fedora Linux 36
+
 * Sat May 28 2022 Ole Aamot <ole@gnome.org> - 0.0.4-1
 - gnome-voice 0.0.4 build on Fedora Linux 36
 

@@ -1,4 +1,20 @@
 =============
+Version 0.0.5
+=============
+
+Build (configure.ac)
+
+	* Build on Ubuntu 22.04
+
+Build (gnome-voice.spec)
+
+	* Build on Fedora Core 36
+
+GUI (src/gnome-voice-main.c)
+
+	* Voicegram Vorbis Tags
+
+=============
 Version 0.0.4
 =============
 

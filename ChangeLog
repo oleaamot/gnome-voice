@@ -1,3 +1,13 @@
+2022-07-09  Ole Aamot  <ole@gnome.org>
+
+	* GNOME Voice 0.0.5
+	* gnome-voice-main.c: Add Vorbis Tags
+
+2022-05-28  Ole Aamot  <ole@gnome.org>
+
+	* GNOME Voice 0.0.4
+	* gnome-voice-main.c: Add Voicegram Callback
+
 2022-05-28  Ole Aamot  <ole@gnome.org>
 
 	* GNOME Voice 0.0.3
