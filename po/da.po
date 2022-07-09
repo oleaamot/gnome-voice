@@ -1,14 +1,14 @@
 # Danish translations for gnome-voice package.
-# Copyright (C) 2021  Aamot Software
+# Copyright (C) 2022  Aamot Software
 # This file is distributed under the same license as the gnome-voice package.
-# Ole Aamot <ole@gnome.org>, 2021.
+# Ole Aamot <ole@gnome.org>, 2022.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-voice 0.0.1\n"
+"Project-Id-Version: gnome-voice 0.0.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-02-15 00:45+0200\n"
-"PO-Revision-Date: 2022-02-15 00:45+0200\n"
+"PO-Revision-Date: 2022-07-09 21:38+0200\n"
 "Last-Translator: Ole Aamot <ole@gnome.org>\n"
 "Language-Team: Danish\n"
 "Language: da\n"
@@ -18,9 +18,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../data/gnome-voice.appdata.xml.in.h:1
-msgid "GNOME Voice for GNOME 42"
-msgstr "GNOME Voice for GNOME 42"
+msgid "GNOME Voice for GNOME 43"
+msgstr "GNOME Voice for GNOME 43"
 
 #: ../data/gnome-voice.appdata.xml.in.h:2
-msgid "Listen to Free Public Voice on GNOME 42"
-msgstr "Lytt til Fri Offentlig Stemme i GNOME 42"
+msgid "Listen to and discuss a Free Public Voice on GNOME 43"
+msgstr "Lytt til og diskuter Fri Offentlig Stemme i GNOME 43"

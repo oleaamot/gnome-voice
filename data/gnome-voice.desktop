@@ -11,7 +11,7 @@ Categories=GNOME;GTK;Music;Audio;AudioVideo;
 X-GNOME-Bugzilla-Bugzilla=GNOME
 X-GNOME-Bugzilla-Product=gnome-voice
 X-GNOME-Bugzilla-Component=general
-X-GNOME-Bugzilla-Version=0.0.1
+X-GNOME-Bugzilla-Version=0.0.6
 MimeType=application/gnome-voice;
 # Extra keywords that can be used to search for gnome-voice in GNOME Shell and Unity
 Keywords=Live;Voice;Program;Station;Free;
