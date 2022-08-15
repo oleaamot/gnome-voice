@@ -57,6 +57,9 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/gnome-voice.svg
 
 %changelog
+* Mon Aug 15 2022 Ole Aamot <ole@gnome.org> - 0.0.8-1
+- gnome-voice 0.0.8 build on Fedora Linux 36
+
 * Sat Jul 09 2022 Ole Aamot <ole@gnome.org> - 0.0.6-1
 - gnome-voice 0.0.6 build on Fedora Linux 36
 

@@ -514,7 +514,7 @@ main (gint argc, gchar **argv)
 				 GST_TAG_TITLE, g_get_real_name(),
 				 GST_TAG_ARTIST, g_get_real_name(),
 				 GST_TAG_ALBUM, "Voicegram",
-				 GST_TAG_COMMENT, "GNOME Voice 0.0.5",
+				 GST_TAG_COMMENT, "GNOME Voice 0.0.8",
 				 GST_TAG_DATE, g_date_time_format_iso8601 (datestamp),
 				 NULL);
 	g_date_time_unref (datestamp);
