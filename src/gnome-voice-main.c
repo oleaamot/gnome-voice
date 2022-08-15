@@ -11,22 +11,19 @@
 #include <geoclue.h>
 #include <config.h>
 #include <gtk/gtk.h>
-#include <gst/player/player.h>
-#include <champlain/champlain.h>
 #include <champlain-gtk/champlain-gtk.h>
 #include <clutter-gtk/clutter-gtk.h>
-#include <glib/gstdio.h>
-#include <glib/gi18n.h>
-#include <string.h>
-#include <geoclue.h>
 
 #include "gnome-voice-file.h"
 #include "gnome-voice-vosc.h"
+#include "gnome-voice-main.h"
+
 #define VOICE_MARKER_SIZE 10
 
 GClueSimple *simple = NULL;
 GClueClient *client = NULL;
 GMainLoop *main_loop;
+GClueLocation *location = NULL;
 
 #define N_COLS 2
 #define COL_ID 0
@@ -60,7 +57,7 @@ on_simple_ready (GObject      *source_object,
                  gpointer      user_data)
 {
         GError *error = NULL;
-
+	GClueSimple *simple = NULL;
         simple = gclue_simple_new_finish (res, &error);
         if (error != NULL) {
             g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
@@ -73,10 +70,10 @@ on_simple_ready (GObject      *source_object,
                 g_print ("Client object: %s\n",
                          g_dbus_proxy_get_object_path (G_DBUS_PROXY (client)));
 
-                g_signal_connect (client,
-                                  "notify::active",
-                                  G_CALLBACK (on_client_active_notify),
-                                  NULL);
+		g_signal_connect (client,
+				  "notify::active",
+				  G_CALLBACK (on_client_active_notify),
+				  NULL);
         }
         gps_callback (simple, user_data);
 
@@ -362,34 +359,11 @@ create_voicegram (void)
 	return voicegram;
 }
 
-double lat = 21.293352;
-double lon = -157.839583;
-
-double lat_gps = 60.293352;
-double lon_gps = 10.839583;
-
-typedef struct
-{
-	ChamplainView *view;
-	ChamplainMarker *voice_marker;
-} GpsCallbackData;
-
-typedef struct
-{
-	ChamplainView *view;
-	ChamplainMarker *voicegram;
-} GetVoicegramData;
-
-typedef struct
-{
-        VoiceOscilloscope *oscilloscope_visual;
-} OscilloscopeCallbackData;
-
 gboolean
 gps_callback (GClueSimple *simple, GpsCallbackData *data)
 {
 
-        GError **error;
+        GError **error = NULL;
 	gdouble lat, lon;
 	ClutterColor city_color = { 0x9a, 0x9b, 0x9c, 0x9d };
 	ClutterColor text_color = { 0xff, 0xff, 0xff, 0xff };
@@ -397,72 +371,23 @@ gps_callback (GClueSimple *simple, GpsCallbackData *data)
 	const char *name, *name_city, *name_country;
 	/* GeocodeForward *fwd; */
 	/* GList *list; */
-        GClueLocation *location;
+
         gdouble altitude, speed, heading;
         GVariant *timestamp;
         GTimeVal tv = { 0 };
         const char *desc;
 
-        location = gclue_simple_get_location (simple);
-        g_print ("\nNew location:\n");
-        g_print ("Latitude:    %f°\nLongitude:   %f°\nAccuracy:    %f meters\n",
-                 gclue_location_get_latitude (location),
-                 gclue_location_get_longitude (location),
-                 gclue_location_get_accuracy (location));
-
-	champlain_view_center_on (CHAMPLAIN_VIEW (data->view),
-				  gclue_location_get_latitude (location),
-				  gclue_location_get_longitude (location));
-	
-        altitude = gclue_location_get_altitude (location);
-        if (altitude != -G_MAXDOUBLE)
-                g_print ("Altitude:    %f meters\n", altitude);
-        speed = gclue_location_get_speed (location);
-        if (speed >= 0)
-                g_print ("Speed:       %f meters/second\n", speed);
-        heading = gclue_location_get_heading (location);
-        if (heading >= 0)
-                g_print ("Heading:     %f°\n", heading);
-
-        desc = gclue_location_get_description (location);
-        if (strlen (desc) > 0)
-                g_print ("Description: %s\n", desc);
-
-        timestamp = gclue_location_get_timestamp (location);
-        if (timestamp) {
-                GDateTime *date_time;
-                gchar *str;
-
-                g_variant_get (timestamp, "(tt)", &tv.tv_sec, &tv.tv_usec);
-
-                date_time = g_date_time_new_from_timeval_local (&tv);
-                str = g_date_time_format
-                      (date_time,
-                       "%c (%s seconds since the Epoch)");
-                g_date_time_unref (date_time);
-
-                g_print ("Timestamp:   %s\n", str);
-                g_free (str);
-        }
-	/* GError **err; */
-	lat = gclue_location_get_latitude (location);
-        lon = gclue_location_get_longitude (location),
-	/* champlain_view_center_on (CHAMPLAIN_VIEW (view), lat, lon); */
-	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat, lon);
+        GError **err = NULL;
+	lat_gps = gclue_location_get_latitude (location);
+        lon_gps = gclue_location_get_longitude (location),
+        champlain_view_center_on (CHAMPLAIN_VIEW (data->view), lat_gps, lon_gps);
+	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat_gps, lon_gps);
 	lat_s = champlain_location_get_latitude (CHAMPLAIN_LOCATION (data->voice_marker));
 	lon_s = champlain_location_get_longitude (CHAMPLAIN_LOCATION (data->voice_marker));
 	g_print ("Mouse click at: %f %f (%s)\n", lat_s, lon_s, name);
 
-	champlain_view_center_on (data->view, lat, lon);
-	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat, lon);
-	return TRUE;
-}
-
-gboolean
-get_callback (GetVoicegramData *data)
-{
 	champlain_view_center_on (data->view, lat_gps, lon_gps);
-	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voicegram), lat_gps, lon_gps);
+	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat_gps, lon_gps);
 	return TRUE;
 }
 
@@ -553,15 +478,15 @@ main (gint argc, gchar **argv)
 	gclue_simple_new ("gnome-voice",
 			  accuracy_level,
 			  time_threshold,
-			  on_simple_ready,
+			  (GClueSimple *)on_simple_ready,
 			  CHAMPLAIN_VIEW (view));
 	
-	// location = gclue_simple_get_location (simple);
+	location = gclue_simple_get_location (GCLUE_SIMPLE(simple));
 
 	/* Finish initialising the map view */
 	g_object_set (G_OBJECT (actor), "zoom-level", 1,
 		      "kinetic-mode", TRUE, NULL);
-	champlain_view_center_on (CHAMPLAIN_VIEW (actor), lat, lon);
+	champlain_view_center_on (CHAMPLAIN_VIEW (actor), lat_gps, lon_gps);
 	g_object_set (G_OBJECT (second), "zoom-level", 6,
 		      "kinetic-mode", TRUE, NULL);
 	champlain_view_center_on (CHAMPLAIN_VIEW (second), lat_gps, lon_gps);
