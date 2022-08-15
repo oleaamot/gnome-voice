@@ -5,15 +5,163 @@
 #include <math.h>
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
+#include <glib/gstdio.h>
+#include <glib/gi18n.h>
+#include <string.h>
+#include <geoclue.h>
+#include <config.h>
+#include <gtk/gtk.h>
+#include <gst/player/player.h>
+#include <champlain/champlain.h>
+#include <champlain-gtk/champlain-gtk.h>
+#include <clutter-gtk/clutter-gtk.h>
+#include <glib/gstdio.h>
+#include <glib/gi18n.h>
+#include <string.h>
+#include <geoclue.h>
+
 #include "gnome-voice-file.h"
 #include "gnome-voice-vosc.h"
 #define VOICE_MARKER_SIZE 10
 
+GClueSimple *simple = NULL;
+GClueClient *client = NULL;
+GMainLoop *main_loop;
+
+#define N_COLS 2
+#define COL_ID 0
+#define COL_NAME 1
+
+static gboolean
+on_location_timeout (gpointer user_data)
+{
+        g_clear_object (&client);
+        g_clear_object (&simple);
+        g_main_loop_quit (main_loop);
+
+        return FALSE;
+}
+
+static void
+on_client_active_notify (GClueClient *client,
+                         GParamSpec *pspec,
+                         gpointer    user_data)
+{
+        if (gclue_client_get_active (client))
+                return;
+
+        g_print ("Geolocation disabled. Quitting..\n");
+        on_location_timeout (NULL);
+}
+
+static void
+on_simple_ready (GObject      *source_object,
+                 GAsyncResult *res,
+                 gpointer      user_data)
+{
+        GError *error = NULL;
+
+        simple = gclue_simple_new_finish (res, &error);
+        if (error != NULL) {
+            g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
+
+            exit (-1);
+        }
+        client = gclue_simple_get_client (simple);
+        if (client) {
+                g_object_ref (client);
+                g_print ("Client object: %s\n",
+                         g_dbus_proxy_get_object_path (G_DBUS_PROXY (client)));
+
+                g_signal_connect (client,
+                                  "notify::active",
+                                  G_CALLBACK (on_client_active_notify),
+                                  NULL);
+        }
+        gps_callback (simple, user_data);
+
+        g_signal_connect (simple,
+                          "notify::location",
+                          G_CALLBACK (gps_callback),
+                          user_data);
+}
+
 static void
 on_clicked (ClutterClickAction *action, ClutterActor *actor, gpointer user_data) {
-        printf ("Clutter Voice marker clicked\n");
+
+  printf ("Clutter Voice marker clicked\n");
         return;
 }
+
+
+static void
+map_source_changed (GtkWidget *widget,
+		    ChamplainView *view)
+{
+	gchar *id;
+	ChamplainMapSource *source;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+
+	if (!gtk_combo_box_get_active_iter (GTK_COMBO_BOX (widget), &iter))
+		return;
+
+	model = gtk_combo_box_get_model (GTK_COMBO_BOX (widget));
+
+	gtk_tree_model_get (model, &iter, COL_ID, &id, -1);
+
+	ChamplainMapSourceFactory *factory = champlain_map_source_factory_dup_default ();
+	source = champlain_map_source_factory_create_cached_source (factory, id);
+	g_object_set (G_OBJECT (view), "map-source", source, NULL);
+	g_object_unref (factory);
+}
+
+static void
+zoom_changed (GtkSpinButton *spinbutton,
+	      ChamplainView *view)
+{
+	gint zoom = gtk_spin_button_get_value_as_int (spinbutton);
+
+	g_object_set (G_OBJECT (view), "zoom-level", zoom, NULL);
+}
+
+
+/* Commandline options */
+static gint timeout = 30; /* seconds */
+static GClueAccuracyLevel accuracy_level = GCLUE_ACCURACY_LEVEL_EXACT;
+static gint time_threshold;
+
+static GOptionEntry entries[] =
+{
+        { "timeout",
+          't',
+          0,
+          G_OPTION_ARG_INT,
+          &timeout,
+          N_("Exit after T seconds. Default: 30"),
+          "T" },
+        { "time-threshold",
+          'i',
+          0,
+          G_OPTION_ARG_INT,
+          &time_threshold,
+          N_("Only report location update after T seconds. "
+             "Default: 0 (report new location without any delay)"),
+          "T" },
+        { "accuracy-level",
+          'a',
+          0,
+          G_OPTION_ARG_INT,
+          &accuracy_level,
+          N_("Request accuracy level A. "
+             "Country = 1, "
+             "City = 4, "
+             "Neighborhood = 5, "
+             "Street = 6, "
+             "Exact = 8."),
+          "A" },
+        { NULL }
+};
 
 static void
 on_clicked_voicegram (ClutterClickAction *action, ClutterActor *actor, gpointer user_data) {
@@ -237,15 +385,80 @@ typedef struct
         VoiceOscilloscope *oscilloscope_visual;
 } OscilloscopeCallbackData;
 
-static gboolean
-gps_callback (GpsCallbackData *data)
+gboolean
+gps_callback (GClueSimple *simple, GpsCallbackData *data)
 {
+
+        GError **error;
+	gdouble lat, lon;
+	ClutterColor city_color = { 0x9a, 0x9b, 0x9c, 0x9d };
+	ClutterColor text_color = { 0xff, 0xff, 0xff, 0xff };
+	gdouble lat_s, lon_s;
+	const char *name, *name_city, *name_country;
+	/* GeocodeForward *fwd; */
+	/* GList *list; */
+        GClueLocation *location;
+        gdouble altitude, speed, heading;
+        GVariant *timestamp;
+        GTimeVal tv = { 0 };
+        const char *desc;
+
+        location = gclue_simple_get_location (simple);
+        g_print ("\nNew location:\n");
+        g_print ("Latitude:    %f°\nLongitude:   %f°\nAccuracy:    %f meters\n",
+                 gclue_location_get_latitude (location),
+                 gclue_location_get_longitude (location),
+                 gclue_location_get_accuracy (location));
+
+	champlain_view_center_on (CHAMPLAIN_VIEW (data->view),
+				  gclue_location_get_latitude (location),
+				  gclue_location_get_longitude (location));
+	
+        altitude = gclue_location_get_altitude (location);
+        if (altitude != -G_MAXDOUBLE)
+                g_print ("Altitude:    %f meters\n", altitude);
+        speed = gclue_location_get_speed (location);
+        if (speed >= 0)
+                g_print ("Speed:       %f meters/second\n", speed);
+        heading = gclue_location_get_heading (location);
+        if (heading >= 0)
+                g_print ("Heading:     %f°\n", heading);
+
+        desc = gclue_location_get_description (location);
+        if (strlen (desc) > 0)
+                g_print ("Description: %s\n", desc);
+
+        timestamp = gclue_location_get_timestamp (location);
+        if (timestamp) {
+                GDateTime *date_time;
+                gchar *str;
+
+                g_variant_get (timestamp, "(tt)", &tv.tv_sec, &tv.tv_usec);
+
+                date_time = g_date_time_new_from_timeval_local (&tv);
+                str = g_date_time_format
+                      (date_time,
+                       "%c (%s seconds since the Epoch)");
+                g_date_time_unref (date_time);
+
+                g_print ("Timestamp:   %s\n", str);
+                g_free (str);
+        }
+	/* GError **err; */
+	lat = gclue_location_get_latitude (location);
+        lon = gclue_location_get_longitude (location),
+	/* champlain_view_center_on (CHAMPLAIN_VIEW (view), lat, lon); */
+	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat, lon);
+	lat_s = champlain_location_get_latitude (CHAMPLAIN_LOCATION (data->voice_marker));
+	lon_s = champlain_location_get_longitude (CHAMPLAIN_LOCATION (data->voice_marker));
+	g_print ("Mouse click at: %f %f (%s)\n", lat_s, lon_s, name);
+
 	champlain_view_center_on (data->view, lat, lon);
 	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat, lon);
 	return TRUE;
 }
 
-static gboolean
+gboolean
 get_callback (GetVoicegramData *data)
 {
 	champlain_view_center_on (data->view, lat_gps, lon_gps);
@@ -272,6 +485,13 @@ main (gint argc, gchar **argv)
 	gchar *filename;
 	GTimeVal *timeval;
 	GDateTime *datestamp;
+	guint context_id;
+	GClueLocation *location;
+        gdouble altitude, speed, heading;
+        GVariant *timestamp;
+        GTimeVal tv = { 0 };
+        const char *desc;
+
 	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
@@ -330,6 +550,14 @@ main (gint argc, gchar **argv)
 	/* Create a oscilloscope_visual */
 	/* oscilloscope_visual = create_oscilloscope_visual (); */
         /* gnome_voice_add_visual_oscilloscope (layer, GNOME_VOICE_MARKER (oscilloscope_visual)); */
+	gclue_simple_new ("gnome-voice",
+			  accuracy_level,
+			  time_threshold,
+			  on_simple_ready,
+			  CHAMPLAIN_VIEW (view));
+	
+	// location = gclue_simple_get_location (simple);
+
 	/* Finish initialising the map view */
 	g_object_set (G_OBJECT (actor), "zoom-level", 1,
 		      "kinetic-mode", TRUE, NULL);

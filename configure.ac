@@ -23,8 +23,10 @@ PKG_CHECK_MODULES(GNOME_VOICE,
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10)
-GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
+GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12 geoclue-2.0 libgeoclue-2.0 libxml-2.0 pangoft2"
 
 # Checks for header files.
 

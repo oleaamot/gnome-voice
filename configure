@@ -4651,6 +4651,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
                   gstreamer-video-1.0 \\
                   gstreamer-plugins-bad-1.0 \\
                   gstreamer-plugins-base-1.0 \\
+		  geoclue-2.0 >= 2.5.7 \\
+		  libgeoclue-2.0 >= 2.5.7 \\
                   champlain-gtk-0.12 >= 0.12.10\""; } >&5
   ($PKG_CONFIG --exists --print-errors "clutter-gtk-1.0 >= 1.8.4 \
                   gtk+-3.0 >= 3.22.30 \
@@ -4660,6 +4662,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
@@ -4672,6 +4676,8 @@ if test -n "$GNOME_VOICE_CFLAGS"; then
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
@@ -4692,6 +4698,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
                   gstreamer-video-1.0 \\
                   gstreamer-plugins-bad-1.0 \\
                   gstreamer-plugins-base-1.0 \\
+		  geoclue-2.0 >= 2.5.7 \\
+		  libgeoclue-2.0 >= 2.5.7 \\
                   champlain-gtk-0.12 >= 0.12.10\""; } >&5
   ($PKG_CONFIG --exists --print-errors "clutter-gtk-1.0 >= 1.8.4 \
                   gtk+-3.0 >= 3.22.30 \
@@ -4701,6 +4709,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10") 2>&5
   ac_status=$?
   printf "%s\n" "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
@@ -4713,6 +4723,8 @@ if test -n "$GNOME_VOICE_LIBS"; then
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
@@ -4742,6 +4754,8 @@ fi
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10" 2>&1`
         else
 	        GNOME_VOICE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "clutter-gtk-1.0 >= 1.8.4 \
@@ -4752,6 +4766,8 @@ fi
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
@@ -4765,6 +4781,8 @@ fi
                   gstreamer-video-1.0 \
                   gstreamer-plugins-bad-1.0 \
                   gstreamer-plugins-base-1.0 \
+		  geoclue-2.0 >= 2.5.7 \
+		  libgeoclue-2.0 >= 2.5.7 \
                   champlain-gtk-0.12 >= 0.12.10) were not met:
 
 $GNOME_VOICE_PKG_ERRORS
@@ -4797,7 +4815,7 @@ else
 printf "%s\n" "yes" >&6; }
 
 fi
-GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12"
+GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12 geoclue-2.0 libgeoclue-2.0 libxml-2.0 pangoft2"
 
 # Checks for header files.
 
