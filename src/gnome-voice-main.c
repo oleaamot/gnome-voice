@@ -122,7 +122,7 @@ zoom_changed (GtkSpinButton *spinbutton,
 
 
 /* Commandline options */
-static gint timeout = 30; /* seconds */
+static gint timeout = 3600; /* seconds */
 static GClueAccuracyLevel accuracy_level = GCLUE_ACCURACY_LEVEL_EXACT;
 static gint time_threshold;
 
@@ -133,7 +133,7 @@ static GOptionEntry entries[] =
           0,
           G_OPTION_ARG_INT,
           &timeout,
-          N_("Exit after T seconds. Default: 30"),
+          N_("Exit after T seconds. Default: 3600"),
           "T" },
         { "time-threshold",
           'i',
@@ -365,7 +365,6 @@ gps_callback (GClueSimple *simple, GpsCallbackData *data)
 	gdouble lat, lon;
 	ClutterColor city_color = { 0x9a, 0x9b, 0x9c, 0x9d };
 	ClutterColor text_color = { 0xff, 0xff, 0xff, 0xff };
-	gdouble lat_s, lon_s;
 	const char *name, *name_city, *name_country;
 	/* GeocodeForward *fwd; */
 	/* GList *list; */
@@ -375,17 +374,12 @@ gps_callback (GClueSimple *simple, GpsCallbackData *data)
         GTimeVal tv = { 0 };
         const char *desc;
 
-        GError **err = NULL;
 	lat_gps = gclue_location_get_latitude (location);
-        lon_gps = gclue_location_get_longitude (location),
-        champlain_view_center_on (CHAMPLAIN_VIEW (data->view), lat_gps, lon_gps);
-	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat_gps, lon_gps);
-	lat_s = champlain_location_get_latitude (CHAMPLAIN_LOCATION (data->voice_marker));
-	lon_s = champlain_location_get_longitude (CHAMPLAIN_LOCATION (data->voice_marker));
-	g_print ("Mouse click at: %f %f (%s)\n", lat_s, lon_s, name);
+	lon_gps = gclue_location_get_longitude (location),
 
-	champlain_view_center_on (data->view, lat_gps, lon_gps);
+	champlain_view_center_on (CHAMPLAIN_VIEW (data->view), lat_gps, lon_gps);
 	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat_gps, lon_gps);
+
 	return TRUE;
 }
 
@@ -476,7 +470,7 @@ main (gint argc, gchar **argv)
 	gclue_simple_new ("gnome-voice",
 			  accuracy_level,
 			  time_threshold,
-			  (GClueSimple *)on_simple_ready,
+			  on_simple_ready,
 			  CHAMPLAIN_VIEW (view));
 	
 	location = gclue_simple_get_location (GCLUE_SIMPLE(simple));
@@ -500,17 +494,10 @@ main (gint argc, gchar **argv)
 	/* gnome_voice_file_loader (voiceinfo, "gnome-voice.xml"); */
 	gst_player_set_uri (GST_PLAYER (player), "http://api.perceptron.stream:8000/56.ogg");
 	gst_player_stop (GST_PLAYER (player));
-	/* Visual Oscillator */
-        /* vosc->window = gtk_window_new (GTK_WINDOW_TOPLEVEL); */
-        /* gtk_widget_show_all (vosc->window); */
-        /* gnome_voice_real(GST_PLAYER (player), CLUTTER_ACTOR (voice_oscilloscope)); */
-        /* clutter_container_add_actor (CLUTTER_CONTAINER (stage), CLUTTER_ACTOR (voice_oscilloscope)); */
 	gst_player_play(GST_PLAYER (player));
-	g_timeout_add (1000, (GSourceFunc) gps_callback, &callback_data);
-	g_timeout_add (1000, (GSourceFunc) gps_callback, &voicegram_data);
-	/* g_timeout_add (1000, (GSourceFunc) gnome_voice_real, &oscilloscope_data); */
+	g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &callback_data);
+	g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &voicegram_data);
 	clutter_actor_show (stage);
-        /* clutter_actor_show (voice_oscilloscope); */
 	clutter_main ();
 	g_main_loop_run(main_loops);
 
