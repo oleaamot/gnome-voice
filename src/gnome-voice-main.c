@@ -75,8 +75,6 @@ on_simple_ready (GObject      *source_object,
 				  G_CALLBACK (on_client_active_notify),
 				  NULL);
         }
-        gps_callback (simple, user_data);
-
         g_signal_connect (simple,
                           "notify::location",
                           G_CALLBACK (gps_callback),
@@ -86,7 +84,7 @@ on_simple_ready (GObject      *source_object,
 static void
 on_clicked (ClutterClickAction *action, ClutterActor *actor, gpointer user_data) {
 
-  printf ("Clutter Voice marker clicked\n");
+        printf ("Clutter Voice marker clicked\n");
         return;
 }
 

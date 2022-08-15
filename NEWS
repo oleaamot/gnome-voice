@@ -1,4 +1,12 @@
 =============
+Version 0.0.9
+=============
+
+GUI (src/gnome-voice-main.c)
+
+	* Add gps_callback()
+
+=============
 Version 0.0.8
 =============
 
