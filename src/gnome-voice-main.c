@@ -375,7 +375,7 @@ gps_callback (GClueSimple *simple, GpsCallbackData *data)
         const char *desc;
 
 	lat_gps = gclue_location_get_latitude (location);
-	lon_gps = gclue_location_get_longitude (location),
+	lon_gps = gclue_location_get_longitude (location);
 
 	champlain_view_center_on (CHAMPLAIN_VIEW (data->view), lat_gps, lon_gps);
 	champlain_location_set_location (CHAMPLAIN_LOCATION (data->voice_marker), lat_gps, lon_gps);
@@ -403,12 +403,12 @@ main (gint argc, gchar **argv)
 	GTimeVal *timeval;
 	GDateTime *datestamp;
 	guint context_id;
-	GClueLocation *location;
+	/* GClueLocation *location; */
         gdouble altitude, speed, heading;
         GVariant *timestamp;
         GTimeVal tv = { 0 };
         const char *desc;
-
+	gchar *voice_xml;
 	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
@@ -431,7 +431,7 @@ main (gint argc, gchar **argv)
 				 GST_TAG_TITLE, g_get_real_name(),
 				 GST_TAG_ARTIST, g_get_real_name(),
 				 GST_TAG_ALBUM, "Voicegram",
-				 GST_TAG_COMMENT, "GNOME Voice 0.0.8",
+				 GST_TAG_COMMENT, "GNOME Voice 0.1.0",
 				 GST_TAG_DATE, g_date_time_format_iso8601 (datestamp),
 				 NULL);
 	g_date_time_unref (datestamp);
@@ -464,9 +464,17 @@ main (gint argc, gchar **argv)
 	/* Create a voicegram */
 	voicegram = create_voicegram ();
 	champlain_marker_layer_add_marker (world, CHAMPLAIN_MARKER (voicegram));
+#if 0
+	/* Locate a voicegram */
+	voice_xml = g_strconcat (GNOME_VOICE_DATADIR, "/gnome-voice.xml", NULL);
+	voiceinfo = (VoiceInfo *)g_new0 (VoiceInfo, 1);
+	gnome_voice_file_loader (voiceinfo, voice_xml);
+#endif
 	/* Create a oscilloscope_visual */
 	/* oscilloscope_visual = create_oscilloscope_visual (); */
         /* gnome_voice_add_visual_oscilloscope (layer, GNOME_VOICE_MARKER (oscilloscope_visual)); */
+
+#if 0
 	gclue_simple_new ("gnome-voice",
 			  accuracy_level,
 			  time_threshold,
@@ -474,13 +482,19 @@ main (gint argc, gchar **argv)
 			  CHAMPLAIN_VIEW (view));
 	
 	location = gclue_simple_get_location (GCLUE_SIMPLE(simple));
-
+#endif
 	/* Finish initialising the map view */
 	g_object_set (G_OBJECT (actor), "zoom-level", 1,
 		      "kinetic-mode", TRUE, NULL);
+#if 0
+	champlain_view_center_on (CHAMPLAIN_VIEW (actor), (gdouble)*voiceinfo->location->lat, (gdouble)*voiceinfo->location->lon);
+#endif
 	champlain_view_center_on (CHAMPLAIN_VIEW (actor), lat_gps, lon_gps);
 	g_object_set (G_OBJECT (second), "zoom-level", 6,
 		      "kinetic-mode", TRUE, NULL);
+#if 0
+	champlain_view_center_on (CHAMPLAIN_VIEW (second), (gdouble)*voiceinfo->location->lat, (gdouble)*voiceinfo->location->lon);
+#endif
 	champlain_view_center_on (CHAMPLAIN_VIEW (second), lat_gps, lon_gps);
 	/* Create callback that updates the map periodically */
 	callback_data.view = CHAMPLAIN_VIEW (actor);
@@ -491,12 +505,16 @@ main (gint argc, gchar **argv)
         /* oscilloscope_data.oscilloscope_visual = GNOME_VOICE_MARKER (oscilloscope_visual); */
 	/* Create the voice player */
 	player = gst_player_new (NULL, gst_player_g_main_context_signal_dispatcher_new(NULL));
-	/* gnome_voice_file_loader (voiceinfo, "gnome-voice.xml"); */
-	gst_player_set_uri (GST_PLAYER (player), "http://api.perceptron.stream:8000/56.ogg");
+#if 0
+	gst_player_set_uri (GST_PLAYER (player), (gchar*)voiceinfo->stream->uri);
+#endif
+	gst_player_set_uri (GST_PLAYER (player), "http://api.perceptron.stream:8000/56.ogg");	
 	gst_player_stop (GST_PLAYER (player));
 	gst_player_play(GST_PLAYER (player));
-	g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &callback_data);
+#if 0
+        g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &callback_data);
 	g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &voicegram_data);
+#endif
 	clutter_actor_show (stage);
 	clutter_main ();
 	g_main_loop_run(main_loops);

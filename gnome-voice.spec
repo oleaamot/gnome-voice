@@ -1,5 +1,5 @@
 Name:           gnome-voice
-Version:        0.0.9
+Version:        0.1.0
 Release:        1%{?dist}
 Summary:        GNOME Voice for GNOME 43
 License:        GPLv3+
@@ -53,10 +53,14 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %license COPYING
 %{_bindir}/%{name}
 %{_metainfodir}/%{name}.appdata.xml
+%{_datadir}/%{name}/gnome-voice.xml
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/gnome-voice.svg
 
 %changelog
+* Mon Aug 29 2022 Ole Aamot <ole@gnome.org> - 0.0.10-1
+- gnome-voice 0.0.10 build on Fedora Linux 36
+
 * Tue Aug 16 2022 Ole Aamot <ole@gnome.org> - 0.0.9-1
 - gnome-voice 0.0.9 build on Fedora Linux 36
 

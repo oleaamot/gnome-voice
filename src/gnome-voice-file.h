@@ -29,8 +29,8 @@ struct _VoiceWindow {
 };
 
 struct _LocationInfo {
-	double *lat;
-	double *lon;
+	gfloat *lat;
+	gfloat *lon;
 	gchar *city;
 };
 

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([gnome-voice],[0.0.9],[ole@gnome.org])
+AC_INIT([gnome-voice],[0.1.0],[ole@gnome.org])
 
 AC_CONFIG_SRCDIR([src/gnome-voice-main.c])
 AC_CONFIG_HEADERS([config.h])
@@ -25,6 +25,7 @@ PKG_CHECK_MODULES(GNOME_VOICE,
                   gstreamer-plugins-base-1.0 \
 		  geoclue-2.0 >= 2.5.7 \
 		  libgeoclue-2.0 >= 2.5.7 \
+		  libxml-2.0 >= 2.9.14 \
                   champlain-gtk-0.12 >= 0.12.10)
 GNOME_VOICE_PKG_DEPS="clutter-gtk-1.0 gtk+-3.0 gstreamer-1.0 gstreamer-player-1.0 gstreamer-plugins-bad-1.0 gstreamer-plugins-base-1.0 gstreamer-plugins-good-1.0 gstreamer-video-1.0 champlain-gtk-0.12 geoclue-2.0 libgeoclue-2.0 libxml-2.0 pangoft2"
 
@@ -52,6 +53,7 @@ data/gnome-voice.appdata.xml
 data/gnome-voice.desktop.in
 data/icons/Makefile
 gnome-voice.spec
+gnome-voice.xml
 po/Makefile.in
 src/Makefile
 ])

@@ -1,4 +1,16 @@
 =============
+Version 0.1.0
+=============
+
+Build (configure.ac)
+
+	* Build on Fedora Core 36
+
+XML (src/gnome-voice-file.c)
+
+	* Initial XML File Parser
+
+=============
 Version 0.0.9
 =============
 

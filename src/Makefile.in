@@ -209,7 +209,6 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLLIBS = @INTLLIBS@
 INTLTOOL_EXTRACT = @INTLTOOL_EXTRACT@
 INTLTOOL_MERGE = @INTLTOOL_MERGE@
-INTLTOOL_PERL = @INTLTOOL_PERL@
 INTLTOOL_UPDATE = @INTLTOOL_UPDATE@
 INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
@@ -294,10 +293,23 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AM_CPPFLAGS = $(GNOME_VOICE_CFLAGS) \
+	-DGNOME_VOICE_DATADIR="\"$(pkgdatadir)\"" \
+	-DGNOME_VOICE_LOCALEDIR="\"$(localedir)\""
+
+AM_CFLAGS = $(GNOME_VOICE_CFLAGS) \
+	-DGNOME_VOICE_DATADIR="\"$(pkgdatadir)\"" \
+	-DGNOME_VOICE_LOCALEDIR="\"$(localedir)\""
+
+AM_LDFLAGS = $(GNOME_RADIO_LIBS)
 gnome_voice_SOURCES = gnome-voice-file.c gnome-voice-file.h gnome-voice-main.c gnome-voice-main.h gnome-voice-vosc.c gnome-voice-vosc.h
-AM_CPPFLAGS = $(GNOME_VOICE_CFLAGS)
-AM_CFLAGS = $(GNOME_VOICE_CFLAGS)
-gnome_voice_CFLAGS = $(GNOME_VOICE_CFLAGS)
+gnome_voice_CFLAGS = $(GNOME_VOICE_CFLAGS) \
+	-DGNOME_VOICE_DATADIR=\"$(datadir)/gnome-voice\" \
+	-DDATADIR=\"$(datadir)\" \
+	-DGNOME_VOICE_DEBUG=1 \
+	-DGNOME_VOICE_CFG \
+	-DGNOME_VOICE_LOCALEDIR="\"$(localedir)\""
+
 gnome_voice_LDADD = $(GNOME_VOICE_LIBS)
 LDADD = $(GNOME_VOICE_LIBS)
 all: all-am
@@ -666,6 +678,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
+	$(NULL)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

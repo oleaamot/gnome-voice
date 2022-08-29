@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <voice>
   <station name="GNOME" uri="http://foundation.gnome.org/">
     <location lat="37.4216208" lon="-122.1468972">Palo Alto, California</location>
