@@ -26,6 +26,18 @@ typedef struct
         VoiceOscilloscope *oscilloscope_visual;
 } OscilloscopeCallbackData;
 
+typedef struct
+{
+        gboolean gnome_voice_real_name_privacy;
+} GVoiceCfg;
+
 gboolean gps_callback (GClueSimple *simple, GpsCallbackData *data);
+
+static void gv_wizard_entry_changed(GtkEditable *, GtkAssistant *, GstElement *);
+static void gv_wizard_button_toggled(GtkCheckButton *, GtkAssistant *);
+static void gv_wizard_button_clicked(GtkButton *, GtkAssistant *);
+static void gv_wizard_cancel (GtkAssistant *, gpointer);
+static void gv_wizard_close (GtkAssistant *, gpointer);
+static void gv_wizard_apply (GtkAssistant *, gpointer);
 
 #endif /* GNOME_VOICE_MAIN_H */

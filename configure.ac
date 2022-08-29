@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([gnome-voice],[0.1.0],[ole@gnome.org])
+AC_INIT([gnome-voice],[0.2.0],[ole@gnome.org])
 
 AC_CONFIG_SRCDIR([src/gnome-voice-main.c])
 AC_CONFIG_HEADERS([config.h])

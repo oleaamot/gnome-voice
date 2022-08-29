@@ -1,4 +1,12 @@
 =============
+Version 0.2.0
+=============
+
+GUI (src/gnome-voice-main.c)
+
+	* Add Voice Assistant GUI
+
+=============
 Version 0.1.0
 =============
 

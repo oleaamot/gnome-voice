@@ -9,8 +9,6 @@
 #include <glib/gi18n.h>
 #include <string.h>
 #include <geoclue.h>
-#include <config.h>
-#include <gtk/gtk.h>
 #include <champlain-gtk/champlain-gtk.h>
 #include <clutter-gtk/clutter-gtk.h>
 
@@ -24,6 +22,12 @@ GClueSimple *simple = NULL;
 GClueClient *client = NULL;
 GMainLoop *main_loop;
 GClueLocation *location = NULL;
+GtkWidget *title_entry;
+GtkWidget *title_label;
+GtkWidget *filename_entry;
+GtkWidget *filename_label;
+GtkWidget *summary_entry;
+GtkWidget *summary_label;
 
 #define N_COLS 2
 #define COL_ID 0
@@ -125,6 +129,7 @@ zoom_changed (GtkSpinButton *spinbutton,
 static gint timeout = 3600; /* seconds */
 static GClueAccuracyLevel accuracy_level = GCLUE_ACCURACY_LEVEL_EXACT;
 static gint time_threshold;
+GMainLoop *main_loops;
 
 static GOptionEntry entries[] =
 {
@@ -187,7 +192,7 @@ search_text_changed (GtkEntry *entry, VoiceWindow *window)
 	GtkWidget *view;
 	GtkTextBuffer *buffer;
 	GtkTextIter start, match_start, match_end;
-	text = gtk_entry_get_text (entry);
+	text = gtk_entry_get_text (filename_entry);
 	if (text[0] == '\0')
 		return;
 	priv = voice_window_get_instance_private (window);
@@ -383,16 +388,150 @@ gps_callback (GClueSimple *simple, GpsCallbackData *data)
 	return TRUE;
 }
 
+typedef struct {
+	GtkWidget *widget;
+	gint index;
+	const gchar *title;
+	GtkAssistantPageType type;
+	gboolean complete;
+} PageInfo;
+
+static void gv_wizard_entry_changed(GtkEditable * editable,
+				       GtkAssistant * assistant,
+				       GstElement * pipeline)
+{
+	return;
+}
+
+static void gv_wizard_button_toggled(GtkCheckButton * checkbutton,
+					GtkAssistant * assistant)
+{
+	return;
+}
+
+static void gv_wizard_button_clicked(GtkButton * button,
+					GtkAssistant * assistant)
+{
+	GstElement *src, *conv, *enc, *muxer, *sink, *recorder;
+	gchar *filename = NULL;
+	GDateTime *datestamp = g_date_time_new_now_utc ();
+	GstElementFactory *factory;
+	GTimeVal *timeval;
+	gst_element_send_event(recorder, gst_event_new_eos());
+	recorder = gst_pipeline_new("record_pipe");
+	/*
+	  FIXME: Line #59 from https://github.com/GStreamer/gst-plugins-base/blob/master/tools/gst-device-monitor.c
+	  element = gst_device_create_element (device, NULL);
+	  if (!element)
+	  return NULL;
+	  factory = gst_element_get_factory (element);
+	  if (!factory) {
+	  gst_object_unref (element);
+	  return NULL;
+	  }
+	  src = gst_element_factory_create(factory, NULL);
+	*/
+	src = gst_element_factory_make("autoaudiosrc", "auto_source");
+	conv = gst_element_factory_make("audioconvert", "convert");
+	enc = gst_element_factory_make("vorbisenc", "vorbis_enc");
+	muxer = gst_element_factory_make("oggmux", "oggmux");
+	sink = gst_element_factory_make("filesink", "sink");
+	filename = g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/",
+			       "GNOME.ogg", NULL);
+	g_object_set(G_OBJECT(sink), "location",
+		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/",
+				 "GNOME.ogg", NULL), NULL);
+	g_object_set(G_OBJECT(enc), "quality", 1.0);
+	gst_bin_add_many(GST_BIN(recorder), src, conv, enc, muxer, sink, NULL);
+	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
+	gst_element_set_state(recorder, GST_STATE_PLAYING);
+	datestamp = g_date_time_new_now_utc ();
+        gst_tag_setter_add_tags (GST_TAG_SETTER (enc),
+                                 GST_TAG_MERGE_APPEND,
+                                 GST_TAG_TITLE, gtk_entry_get_text(GTK_ENTRY(title_entry)),
+                                 GST_TAG_ARTIST, g_get_real_name(),
+                                 GST_TAG_ALBUM, "Voicegrams",
+                                 GST_TAG_COMMENT, "GNOME 43",
+                                 GST_TAG_DATE, g_date_time_format_iso8601 (datestamp),
+                                 NULL);
+	g_date_time_unref (datestamp);
+	main_loops = g_main_loop_new(NULL, TRUE);
+	g_main_loop_run(main_loops);
+	gst_element_set_state(recorder, GST_STATE_NULL);
+	g_main_loop_unref(main_loops);
+	gst_object_unref(GST_OBJECT(recorder));
+	g_date_time_unref (datestamp);
+}
+
+static void gv_wizard_cancel(GtkAssistant * assistant, gpointer data)
+{
+	if (!main_loops) {
+		g_error("Quit more loops than there are.");
+	} else {
+		GMainLoop *loop = main_loops;
+		g_main_loop_quit(loop);
+		gtk_main_quit();
+	}
+}
+
+static void gv_wizard_close(GtkAssistant * assistant, gpointer data)
+{
+	FILE *voice_pointer = NULL;
+	VoiceInfo *voiceinfo = (VoiceInfo *) data;
+	GDateTime *datestamp = g_date_time_new_now_utc ();
+	gchar *filename_voice =
+	    g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/",
+			"GNOME.voice", NULL);
+	voice_pointer = fopen(filename_voice, "w");
+	fprintf(voice_pointer, "<voice version='%s'>\n", VERSION);
+	fprintf(voice_pointer, "  <station name='%s' uri='http://%s/GNOME.ogg'>\n",
+		g_get_real_name(),
+		g_get_host_name());
+#if 0
+	fprintf(voice_pointer, "    <location lat='%s' lon='%s'>%s</location>\n",
+		voiceinfo->location->lat,
+		voiceinfo->location->lon,
+		voiceinfo->location->city);
+#endif
+	fprintf(voice_pointer, "    <stream>http://%s%s</stream>\n", g_get_host_name(), "/GNOME.ogg");
+	fprintf(voice_pointer, "  </station>\n");
+	fprintf(voice_pointer, "</voice>\n");
+	fclose(voice_pointer);
+	g_date_time_unref (datestamp);
+	gst_element_send_event(data, gst_event_new_eos());
+}
+
+static void gv_wizard_apply(GtkAssistant * assistant, gpointer data)
+{
+        GVoiceCfg *config;
+        GtkWindow *window;
+        /* gtk_init (&argc, &argv); */
+        /* config = main_config (GTK_WIDGET(window), gtk_entry_get_text(GTK_ENTRY(title_entry))); */
+        /* window = main (config); */
+        /* gtk_widget_show_all (window); */
+        /* gst_init(&argc, &argc); */
+        /* gtk_main(); */
+	/* gst_element_send_event(data, gst_event_new_eos()); */
+}
+
+GtkAssistantPageFunc gv_wizard_cb(GtkAssistant * assistant,
+				  GDateTime * datestamp)
+{
+	/* gtk_assistant_next_page(assistant); */
+}
+
+
 gint
 main (gint argc, gchar **argv)
 {
 	GstPlayer *player;
 	GtkWidget *window;
+	GVoiceCfg *config;
 	ChamplainView *view;
-	ClutterActor *actor, *second, *voice_oscilloscope, *voice_marker, *voicegram, *oscilloscope_visual, *stage;
+	ClutterActor *actor, *second, *voice_oscilloscope, *voice_marker, *voicegram, *oscilloscope_visual, *stage, *wizard;
 	ChamplainMarkerLayer *layer;
 	ChamplainMarkerLayer *world;
-	VoiceInfo *voiceinfo;	
+	VoiceInfo *voiceinfo;
 	GpsCallbackData callback_data;
 	GetVoicegramData voicegram_data;
 	GstElement *src, *conv, *enc, *muxer, *sink, *pipeline;
@@ -409,6 +548,82 @@ main (gint argc, gchar **argv)
         GTimeVal tv = { 0 };
         const char *desc;
 	gchar *voice_xml;
+	GtkWidget *introduction;
+	int i = 0;
+	PageInfo page[5] = {
+		{NULL, -1, "Voice 0.2.0", GTK_ASSISTANT_PAGE_INTRO, TRUE},
+		{NULL, -1, "Title", GTK_ASSISTANT_PAGE_CONTENT, TRUE},
+		{NULL, -1, "Filename", GTK_ASSISTANT_PAGE_CONTENT, TRUE},
+		{NULL, -1, "Summary", GTK_ASSISTANT_PAGE_SUMMARY, TRUE},		
+		{NULL, -1, "Complete", GTK_ASSISTANT_PAGE_CONFIRM, TRUE},		
+	};
+	// gtk_init(&argc, &argv);
+	gtk_clutter_init(&argc, &argv);
+	window = gtk_clutter_window_new ();
+	introduction = gtk_assistant_new();
+	gtk_container_add (GTK_WINDOW (window), introduction);
+	gtk_widget_set_size_request(GTK_WIDGET(introduction), 640, 480);
+	gtk_window_set_title(GTK_WINDOW(introduction), "Voice 0.2.0");
+	g_signal_connect(G_OBJECT(introduction), "destroy",
+			 G_CALLBACK(gtk_main_quit), NULL);
+	page[0].widget = gtk_label_new(_("Welcome to Voice 0.2.0!\n\nRecord respectfully around others.\n\nClick Next to setup a voice recording session!\n\nClick Cancel to stop the voice recording session.\n\nClick Cancel twice to exit GNOME Voice."));
+	page[1].widget = gtk_box_new(FALSE, 5);
+	title_label = gtk_label_new(_("Title:"));
+	title_entry = gtk_entry_new();
+	if (g_strcmp0(title_entry, NULL)!=0) gtk_entry_set_text(GTK_ENTRY(title_entry), g_get_real_name()); else gtk_entry_set_text(GTK_ENTRY(title_entry), gtk_entry_get_text(GTK_ENTRY(title_entry)));
+	gtk_box_pack_start(GTK_BOX(page[1].widget), GTK_WIDGET(title_label),
+			   FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(page[1].widget), GTK_WIDGET(title_entry),
+			   FALSE, FALSE, 5);
+	page[2].widget = gtk_box_new(FALSE, 5);
+	filename_label = gtk_label_new(_("Filename:"));
+	filename_entry = gtk_entry_new();
+	if (g_strcmp0(filename_entry, NULL)!=0) gtk_entry_set_text(GTK_ENTRY(filename_entry), g_strconcat ("GNOME.ogg", NULL)); else gtk_entry_set_text(GTK_ENTRY(filename_entry), gtk_entry_get_text(GTK_ENTRY(filename_entry)));
+	gtk_box_pack_start(GTK_BOX(page[2].widget), GTK_WIDGET(filename_label),
+			   FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(page[2].widget), GTK_WIDGET(filename_entry),
+			   FALSE, FALSE, 5);
+	g_signal_connect(G_OBJECT(filename_label), "clicked",
+			 G_CALLBACK(gv_wizard_apply),
+			 gtk_entry_get_text(GTK_ENTRY(filename_entry)));
+	page[3].widget = gtk_box_new(FALSE, 5);
+	summary_label = gtk_label_new(_("Recording"));
+	summary_entry = gtk_entry_new();
+	gtk_entry_set_text(GTK_ENTRY(summary_entry), "Recording");
+	gtk_box_pack_start(GTK_BOX(page[4].widget), GTK_WIDGET(summary_label),
+			   FALSE, FALSE, 5);
+	gtk_box_pack_start(GTK_BOX(page[4].widget), GTK_WIDGET(summary_entry),
+			   FALSE, FALSE, 5);
+	g_signal_connect(G_OBJECT(summary_label), "clicked",
+			 G_CALLBACK(gv_wizard_apply),
+			 gtk_entry_get_text(GTK_ENTRY(summary_entry)));
+	for (i = 0; i < 5; i++) {
+	        page[i].index = gtk_assistant_append_page(GTK_ASSISTANT(introduction),
+					      GTK_WIDGET(page[i].widget));
+		gtk_assistant_set_page_title(GTK_ASSISTANT(introduction),
+					     GTK_WIDGET(page[i].widget),
+					     page[i].title);
+		gtk_assistant_set_page_type(GTK_ASSISTANT(introduction),
+					    GTK_WIDGET(page[i].widget),
+					    page[i].type);
+		gtk_assistant_set_page_complete(GTK_ASSISTANT(introduction),
+						GTK_WIDGET(page[i].widget),
+						page[i].complete);
+	}
+	voice_xml = g_strconcat (GNOME_VOICE_DATADIR, "/gnome-voice.xml", NULL);
+	voiceinfo = (VoiceInfo *)g_new0 (VoiceInfo, 1);
+#if 0	
+	gnome_voice_file_loader (voiceinfo, voice_xml);
+#endif
+	g_signal_connect(G_OBJECT(filename_entry), "changed",
+			 G_CALLBACK(gv_wizard_entry_changed), pipeline);
+	g_signal_connect(G_OBJECT(introduction), "cancel",
+			 G_CALLBACK(gv_wizard_cancel), main_loops);
+	g_signal_connect(G_OBJECT(introduction), "close",
+			 G_CALLBACK(gv_wizard_close), voiceinfo);
+	g_signal_connect(G_OBJECT(introduction), "apply",
+			 G_CALLBACK(gv_wizard_close), pipeline);
+	gtk_widget_show_all (GTK_WIDGET (introduction));
 	gst_init(&argc, &argv);
 	gst_init(NULL, NULL);
 	pipeline = gst_pipeline_new("record_pipe");
@@ -418,9 +633,9 @@ main (gint argc, gchar **argv)
 	enc = gst_element_factory_make("vorbisenc", "vorbis_enc");
 	muxer = gst_element_factory_make("oggmux", "oggmux");
 	sink = gst_element_factory_make("filesink", "sink");
-	filename = g_strconcat("file://", g_get_host_name(), g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL);
+	filename = g_strconcat("file://", g_get_host_name(), g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), gtk_entry_get_text(filename_entry), NULL);
 	g_object_set(G_OBJECT(sink), "location",
-		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/GNOME.ogg", NULL));
+		     g_strconcat(g_get_user_special_dir(G_USER_DIRECTORY_MUSIC), "/", gtk_entry_get_text(filename_entry), NULL));
 	gst_bin_add_many(GST_BIN(pipeline), src, conv, enc, muxer, sink, NULL);
 	gst_element_link_many(src, conv, enc, muxer, sink, NULL);
 
@@ -430,8 +645,8 @@ main (gint argc, gchar **argv)
 				 GST_TAG_MERGE_APPEND,
 				 GST_TAG_TITLE, g_get_real_name(),
 				 GST_TAG_ARTIST, g_get_real_name(),
-				 GST_TAG_ALBUM, "Voicegram",
-				 GST_TAG_COMMENT, "GNOME Voice 0.1.0",
+				 GST_TAG_ALBUM, gtk_entry_get_text(filename_entry),
+				 GST_TAG_COMMENT, "Voice 0.2.0",
 				 GST_TAG_DATE, g_date_time_format_iso8601 (datestamp),
 				 NULL);
 	g_date_time_unref (datestamp);
@@ -441,6 +656,8 @@ main (gint argc, gchar **argv)
 		return 1;
 	/* vosc = (VOSCWindow *)g_new0(VOSCWindow, 1); */
 	stage = clutter_stage_new ();
+
+	wizard = gtk_clutter_window_get_stage (GTK_WINDOW (window));
 	clutter_stage_set_title (stage, g_strconcat(PACKAGE, " ", VERSION, " - ", "http://www.gnomevoice.org/", " - ", "https://wiki.gnome.org/Apps/Voice", NULL));
 	clutter_actor_set_size (stage, 800, 600);
 	g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
@@ -466,9 +683,6 @@ main (gint argc, gchar **argv)
 	champlain_marker_layer_add_marker (world, CHAMPLAIN_MARKER (voicegram));
 #if 0
 	/* Locate a voicegram */
-	voice_xml = g_strconcat (GNOME_VOICE_DATADIR, "/gnome-voice.xml", NULL);
-	voiceinfo = (VoiceInfo *)g_new0 (VoiceInfo, 1);
-	gnome_voice_file_loader (voiceinfo, voice_xml);
 #endif
 	/* Create a oscilloscope_visual */
 	/* oscilloscope_visual = create_oscilloscope_visual (); */
@@ -515,8 +729,11 @@ main (gint argc, gchar **argv)
         g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &callback_data);
 	g_timeout_add (3600000, (GSourceFunc) on_simple_ready, &voicegram_data);
 #endif
-	clutter_actor_show (stage);
+	clutter_container_add_actor (CLUTTER_CONTAINER (voicegram), wizard);
+	clutter_actor_show (stage);	
+	clutter_actor_show (voicegram);
 	clutter_main ();
+
 	g_main_loop_run(main_loops);
 
 	return (0);
