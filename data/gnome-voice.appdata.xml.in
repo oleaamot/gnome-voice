@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <application>
   <id type="desktop">gnome-voice.desktop</id>
-  <_name>GNOME Voice for GNOME 43</_name>
-  <_summary>Listen to Free Public Voice on GNOME 43</_summary>
+  <_name>Voice</_name>
+  <_summary>Listen to Free Public Voice on GNOME 48</_summary>
   <licence>CC0</licence>
   <description>
     <p>
-      GNOME Voice is a Free Software program that allows you easily
-      participate on Free Public Voice broadcasts under GNOME 43.
+      Voice is a Free Software program that allows you easily
+      participate on Free Public Voice broadcasts under GNOME.
     </p>
     <p>
-      GNOME Voice is developed on the GNOME 43 desktop platform and
-      it requires GTK+ 3.0, Clutter and GStreamer 1.0 for playback.
+      Voice is developed on the GNOME 48 desktop platform and
+      it requires GTK+ 3.0, Clutter and GStreamer 1.0 for playback
+      and recording.
     </p>
     <p>    
-    Enjoy Free Public Voice broadcasts under GNOME 43.
+    Enjoy Free Public Voice broadcasts under GNOME 48.
     </p>
   </description>
   <url type="homepage">https://wiki.gnome.org/Apps/Voice</url>
   <screenshots>
     <screenshot type="default">https://gitlab.gnome.org/ole/gnome-voice/data/screenshots/gnome-voice-screenshot.png</screenshot>
   </screenshots>
-  <updatecontact>girl-list@gnome.org</updatecontact>
+  <updatecontact>ole@aamot.org</updatecontact>
 </application>

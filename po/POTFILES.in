@@ -1,6 +1,4 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
 data/gnome-voice.appdata.xml.in
-src/gnome-voice-file.c
-src/gnome-voice-main.c
-src/gnome-voice-vosc.c
+src/gnome-voice-stream.c

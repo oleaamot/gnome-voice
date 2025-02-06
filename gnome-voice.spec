@@ -1,9 +1,9 @@
 Name:           gnome-voice
-Version:        0.2.0
+Version:        48.0
 Release:        1%{?dist}
-Summary:        GNOME Voice for GNOME 43
+Summary:        Voice for GNOME 48
 License:        GPLv3+
-URL:            https://wiki.gnome.org/Apps/Voice
+URL:            https://www.gnomevoice.org
 Source:         %{url}/src/%{name}-%{version}.tar.xz
 
 BuildRequires:  gcc
@@ -28,13 +28,15 @@ Requires:       gtk3 >= 3.24.28
 Requires:       geoclue2 >= 2.5.7
 
 %description
-GNOME Voice is a Free Software program that allows you easily
-participate on Free Public Voice broadcasts under GNOME 43.
+Voice is a Free Software program that allows you easily
+participate on Free Public Voice broadcasts under GNOME 45.
 
-GNOME Voice is developed on the GNOME desktop platform and
+Voice is developed on the GNOME desktop platform and
 it requires GTK+ 3.0, Clutter and GStreamer 1.0 for playback.
 
-Enjoy Free Public Voice broadcasts under GNOME 43.
+Enjoy Free Public Voice broadcasts from
+$HOME/Desktop/{$USERNAME}.voice and recordings to
+$HOME/Desktop/{$USERNAME}.ogg under GNOME 45.
 
 %prep
 %setup -q
@@ -58,29 +60,5 @@ desktop-file-validate %{buildroot}/%{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/gnome-voice.svg
 
 %changelog
-* Mon Aug 29 2022 Ole Aamot <ole@gnome.org> - 0.0.10-1
-- gnome-voice 0.0.10 build on Fedora Linux 36
-
-* Tue Aug 16 2022 Ole Aamot <ole@gnome.org> - 0.0.9-1
-- gnome-voice 0.0.9 build on Fedora Linux 36
-
-* Mon Aug 15 2022 Ole Aamot <ole@gnome.org> - 0.0.8-1
-- gnome-voice 0.0.8 build on Fedora Linux 36
-
-* Sat Jul 09 2022 Ole Aamot <ole@gnome.org> - 0.0.6-1
-- gnome-voice 0.0.6 build on Fedora Linux 36
-
-* Sat Jul 09 2022 Ole Aamot <ole@gnome.org> - 0.0.5-1
-- gnome-voice 0.0.5 build on Fedora Linux 36
-
-* Sat May 28 2022 Ole Aamot <ole@gnome.org> - 0.0.4-1
-- gnome-voice 0.0.4 build on Fedora Linux 36
-
-* Sat May 28 2022 Ole Aamot <ole@gnome.org> - 0.0.3-1
-- gnome-voice 0.0.3 build on Fedora Linux 36
-
-* Sun May 15 2022 Ole Aamot <ole@gnome.org> - 0.0.2-1
-- gnome-voice 0.0.2 build on Fedora Linux 36
-
-* Tue Feb 15 2022 Ole Aamot <ole@gnome.org> - 0.0.1-1
-- gnome-voice 0.0.1 build on Fedora Linux 35
+* Thu Jan 23 2025 Ole Aamot <ole@aamot.org> - 48.0-1
+- gnome-voice 48 build on Fedora Rawhide (Voice 1.0)

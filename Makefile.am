@@ -6,4 +6,4 @@ gnomevoicedir = $(datadir)/gnome-voice
 
 gnomevoice_DATA = gnome-voice.xml
 
-EXTRA_DIST = GEOLOCATION autogen.sh gnome-voice.spec
+EXTRA_DIST = autogen.sh gnome-voice.spec
